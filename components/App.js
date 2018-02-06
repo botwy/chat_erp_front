@@ -3,52 +3,12 @@
  */
 import React, { Component } from 'react';
 import axios from 'axios';
+import LoginWidget from './LoginWidget';
+import HeaderWidget from './HeaderWidget';
+import MsgAreaWidget from './MsgAreaWidget';
+import style from './Style';
+import PropTypes from 'prop-types';
 
-const style = {
-    column: {
-        display: 'flex',
-        flexDirection: 'column'
-    },
-    row: {
-        margin: 5,
-        height: 30,
-        display: 'flex',
-        justifyContent: 'left',
-        flexDirection: 'row'
-    },
-    formSendMsg:{
-        position: 'fixed',
-        display: 'flex',
-        flexDirection: 'row'
-    },
-    messagesArea: {
-        display: 'flex',
-        flexDirection: 'column',
-        marginTop: 70
-    },
-    sender: {
-        color: 'blue',
-        fontStyle: 'italic'
-    },
-    headerName: {
-        color: 'red',
-        fontStyle: 'italic'
-    },
-    message: {
-        color: 'grey',
-        marginLeft: 10,
-    },
-    inputMessage: {
-        width: 300,
-        color: 'grey'
-    },
-    buttons:{
-        width: 160,
-        marginLeft: 5,
-        justifyContent: 'left',
-    }
-
-};
 
 class App extends Component {
     constructor(props) {
@@ -121,15 +81,11 @@ class App extends Component {
         console.log(this.state.messages);
         if (!this.state.login) {
             return (
-                <div style={style.column}>
-                    <p style={style.row}>Введите ваше имя: </p>
-                    <div style={style.row}>
-                    <input style={style.inputMessage} onChange={this.handleChangeMsg}></input>
-                    <button style={style.buttons} onClick={this.handleClickLoginButton}>Войти в чат</button>
-                    </div>
-                </div>
+                <LoginWidget handleChangeMsg={this.handleChangeMsg}
+                             handleClickLoginButton={this.handleClickLoginButton}/>
             );
         }
+
         if (!this.state.messages){
             return (
                 <div>
@@ -137,27 +93,12 @@ class App extends Component {
                 </div>
             )
         }
+
         return (
             <div style={style.column}>
-                <div style={style.formSendMsg}>
-                    <p style={style.headerName}>Ваше имя: {this.state.senderName}</p>
-                <div style={style.row}>
-                    <input style={style.inputMessage} value={this.state.msgForSend} onChange={this.handleChangeMsg}></input>
-                    <button style={style.buttons} onClick={this.handleSendMsg}>Отправить сообщение</button>
-                </div>
-                </div>
-                <div style={style.messagesArea}>
-                {this.state.messages.map(({id, senderName, msgText}) => (
-                    <div key={id} style={style.row}>
-                        <div>
-                            <div style={style.sender}>{senderName}</div>
-                        </div>
-                        <div>
-                            <div style={style.message}>{msgText}</div>
-                        </div>
-                    </div>
-                ))}
-                </div>
+          <HeaderWidget senderName={this.state.senderName} msgForSend={this.state.msgForSend}
+                        handleChangeMsg={this.handleChangeMsg} handleSendMsg={this.handleSendMsg}/>
+           <MsgAreaWidget messages={this.state.messages}/>
             </div>
         )
     }
