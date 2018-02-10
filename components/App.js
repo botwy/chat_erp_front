@@ -53,16 +53,21 @@ const style = {
 class App extends Component {
     constructor(props) {
         super(props);
+
         this.state = {
             messages: null,
             login: false,
             senderName: "",
             msgForSend: "",
-            intervalId: null
+            intervalId: null,
+            exitFromChat: false
         };
         this.handleClickLoginButton=this.handleClickLoginButton.bind(this);
         this.handleChangeMsg=this.handleChangeMsg.bind(this);
         this.handleSendMsg=this.handleSendMsg.bind(this);
+        this.handleExitChat=this.handleExitChat.bind(this);
+        this.handleReturnChat=this.handleReturnChat.bind(this);
+        this.tabCloseHandler =  this.tabCloseHandler.bind(this);
     }
 
     handleChangeMsg(e) {
@@ -82,6 +87,10 @@ class App extends Component {
         //const name = document.getElementById("login_input").value;
         axios.get('http://localhost:8080/chat/login?name='+this.state.msgForSend)
             .then((response) => {
+                if (response.data===false) {
+                    this.setState({msgForSend:""});
+                    alert("Введите другое имя!");
+                }
                 if (response.data===true) {
                     this.setState({login: true, senderName: this.state.msgForSend});
                     this.getChats();
@@ -89,15 +98,49 @@ class App extends Component {
 
                     let intervalId = setInterval(()=>this.getChats(),5000);
                     this.setState({intervalId});
+
+                    window.addEventListener("beforeunload", this.tabCloseHandler);
                 }
 
             })
             .catch((errror) => console.error(errror))
     }
 
-    handleSendMsg(e) {
+    handleExitChat() {
+        axios.get('http://localhost:8080/chat/exit?name='+this.state.senderName)
+            .then((response) => {
+                if (response.data===true) {
+                    this.setState({exitFromChat: true});
+                }
 
-        axios.get('http://localhost:8080/chat/new_msg?name='+this.state.senderName+'&'+'msg='+this.state.msgForSend)
+            })
+            .catch((errror) => console.error(errror))
+    }
+
+    handleReturnChat() {
+        axios.get('http://localhost:8080/chat/return?name='+this.state.senderName)
+            .then((response) => {
+                if (response.data===true) {
+                    this.setState({exitFromChat: false});
+                    this.getChats();
+                }
+
+            })
+            .catch((errror) => console.error(errror))
+    }
+
+    tabCloseHandler(e) {
+        axios.get('http://localhost:8080/chat/close?name='+this.state.senderName)
+            .then().catch((errror) => console.error(errror));
+        e.preventDefault();
+       return e.returnValue = 'Вы уверены, что хотите покинуть чат?';
+    }
+
+    handleSendMsg(e) {
+        const senderName = this.state.senderName;
+        const msgText = this.state.msgForSend;
+        const msg = {senderName, msgText};
+        axios.post('http://localhost:8080/chat/new_msg', msg)
             .then((response) => {
                 if (response.data===true) {
                     this.getChats();
@@ -111,10 +154,12 @@ class App extends Component {
    /* componentDidMount() {
         let intervalId = setInterval(()=>this.getChats(),3000);
         this.setState({intervalId});
+        window.addEventListener("beforeunload", this.tabCloseHandler);
     }*/
 
-    componentWillUnMount() {
+    componentWillUnmount() {
         clearInterval(this.state.intervalId);
+        window.removeEventListener("beforeunload",this.tabCloseHandler);
     }
 
     render() {
@@ -124,8 +169,19 @@ class App extends Component {
                 <div style={style.column}>
                     <p style={style.row}>Введите ваше имя: </p>
                     <div style={style.row}>
-                    <input style={style.inputMessage} onChange={this.handleChangeMsg}></input>
+                    <input style={style.inputMessage} value={this.state.msgForSend} onChange={this.handleChangeMsg}></input>
                     <button style={style.buttons} onClick={this.handleClickLoginButton}>Войти в чат</button>
+                    </div>
+                </div>
+            );
+        }
+
+        if (this.state.exitFromChat) {
+            return (
+                <div style={style.column}>
+                    <p style={style.headerName}>Ваше имя: {this.state.senderName}</p>
+                    <div style={style.row}>
+                        <button style={style.buttons} onClick={this.handleReturnChat}>Вернуться в чат</button>
                     </div>
                 </div>
             );
@@ -144,6 +200,7 @@ class App extends Component {
                 <div style={style.row}>
                     <input style={style.inputMessage} value={this.state.msgForSend} onChange={this.handleChangeMsg}></input>
                     <button style={style.buttons} onClick={this.handleSendMsg}>Отправить сообщение</button>
+                    <button style={style.buttons} onClick={this.handleExitChat}>Покинуть чат</button>
                 </div>
                 </div>
                 <div style={style.messagesArea}>
