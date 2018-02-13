@@ -2,17 +2,22 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './components/App';
 
-import { createStore, compose } from 'redux';
+import { createStore, compose, applyMiddleware } from 'redux';
 import { Provider } from 'react-redux';
-import axios from "axios";
+import thunk from 'redux-thunk';
+
 import EventSystem from "./components/EventSystem";
 import reducer from "./components/reducer";
+
 
 const createStoreWithDevTools = compose(
     global.devToolsExtension ? global.devToolsExtension() : f => f,
 )(createStore);
 
-const store = createStoreWithDevTools(reducer, {login:false, loginName: '', senderName: '', msgForSend:'', messages: null, exitFromChat: false});
+const store = createStoreWithDevTools(reducer
+    , {login:false, loginName: '', senderName: '', msgForSend:'', messages: null, exitFromChat: false}
+    ,applyMiddleware(thunk)
+);
 
 //const store = createStore(reducer, {login:false, loginName: '', senderName: '', msgForSend:'', messages: null, exitFromChat: false});
 EventSystem.store = store;
