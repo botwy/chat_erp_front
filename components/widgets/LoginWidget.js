@@ -12,7 +12,7 @@ const LoginWidget = (props) => (
         <div style={style.row}>
             <input style={style.inputMessage} value={props.loginName} onChange={props.onchangeLoginName}></input>
             <button style={style.buttons} onClick={EventSystem.events.loginTry}>Войти в чат</button>
-            <button style={style.buttons} onClick={props.onGetMessages}>Get messages</button>
+
         </div>
     </div>
 );
@@ -26,16 +26,5 @@ export default connect(
     store => ({loginName: store.loginName}),
     (dispatch, props) => ({
         onchangeLoginName: event => dispatch(changeLoginNameAction(event.target.value)),
-        onGetMessages: () =>
-            dispatch(
-                dispatch => axios.get('http://localhost:8080/chat/allchats')
-                    .then((response) => {
-                        const newMessages = response.data.reverse();
-                        dispatch(getChatsAction(newMessages));
-                        console.log(newMessages);
-                    })
-                    .catch((errror) => console.error(errror))
-            )
-
     })
 )(LoginWidget);

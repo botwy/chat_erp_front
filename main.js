@@ -8,6 +8,7 @@ import thunk from 'redux-thunk';
 
 import EventSystem from "./components/EventSystem";
 import reducer from "./components/reducer";
+import {logger} from "./components/logger";
 
 
 const createStoreWithDevTools = compose(
@@ -16,7 +17,7 @@ const createStoreWithDevTools = compose(
 
 const store = createStoreWithDevTools(reducer
     , {login:false, loginName: '', senderName: '', msgForSend:'', messages: null, exitFromChat: false}
-    ,applyMiddleware(thunk)
+    ,applyMiddleware(logger, thunk)
 );
 
 //const store = createStore(reducer, {login:false, loginName: '', senderName: '', msgForSend:'', messages: null, exitFromChat: false});
