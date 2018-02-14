@@ -23,7 +23,7 @@ export const chatsActionFunction = () => dispatch => {
     axios.get('http://localhost:8080/chat/allchats')
         .then((response) => {
             const newMessages = response.data.reverse();
-            dispatch({ type: GETCHATS, newMessages });
+            dispatch({ type: GETCHATS, messages:newMessages });
             console.log(newMessages);
         })
         .catch((errror) => console.error(errror))
